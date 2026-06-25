@@ -7,6 +7,7 @@ import {
 } from "@/core/access/context";
 import { getModuleRegistry } from "@/core/modules/registry";
 import { SignOutButton } from "./SignOutButton";
+import { LogoMark } from "@/components/Logo";
 
 /** Itens de navegação contribuídos pelos módulos, filtrados por can(). */
 async function visibleNav(ctx: AccessContext) {
@@ -41,7 +42,8 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-center gap-2">
+          <LogoMark size={32} />
           <span className="font-bold text-brand-navy">Go Planner</span>
           <span className="text-sm text-gray-400">·</span>
           <span className="text-sm text-gray-600">{ctx.organizationName}</span>

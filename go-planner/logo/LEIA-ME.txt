@@ -1,0 +1,54 @@
+GO PLANNER — PACOTE DE LOGOTIPO VETORIZADO
+==========================================
+
+Logo reconstruído a partir das imagens originais (JPG) e entregue em vetor (SVG),
+escalável sem perda de qualidade, mais exportações PNG prontas a usar.
+
+-------------------------------------------------
+CORES DA MARCA
+-------------------------------------------------
+Verde     #10AE7E
+Azul      #196FCC
+Roxo      #6553AB
+Laranja   #FCB242
+Navy      #10253F   (visto central + texto)
+
+-------------------------------------------------
+TIPOGRAFIA
+-------------------------------------------------
+O wordmark "Go Planner" e o monograma foram recriados com a fonte
+Poppins (SemiBold / Bold) — uma geométrica arredondada open-source muito
+próxima do original — e convertida em CONTORNOS (paths). Isto significa que
+os SVGs NÃO dependem de a fonte estar instalada: abrem iguais em qualquer lado.
+Tagline em Poppins Medium.
+> Se tiveres a fonte exata do original, posso regenerar o texto com ela.
+
+-------------------------------------------------
+CONTEÚDO
+-------------------------------------------------
+/svg  (vetor — usar sempre que possível: web, impressão, edição)
+  symbol-color / navy / black / white .......... só o símbolo (ícone)
+  lockup-stacked-color / -dark ................. símbolo + nome empilhados
+  lockup-horizontal-color / -dark .............. símbolo + nome lado a lado
+  monogram-go-color / -navy .................... "GO" com o símbolo como "O"
+  app-icon-light / -dark ....................... ícone em quadrado arredondado
+
+/png
+  symbol-color@400 / @1024 ..................... fundo transparente
+  symbol-navy / symbol-white ................... versões 1 cor (1024px)
+  lockup-* / monogram .......................... alta resolução
+  /favicons  16 a 1024 px ...................... favicon web / touch icons
+  /app-icons 512 + 1024 px ..................... iOS / Android / stores
+
+-------------------------------------------------
+QUANDO USAR CADA VERSÃO
+-------------------------------------------------
+Cor (full)      -> uso principal, fundos claros
+Dark            -> fundos escuros (texto a branco)
+Navy / Black    -> uma só cor: carimbo, gravação, fax, fundos claros
+White           -> uma só cor sobre fundo escuro/fotografia
+Símbolo só      -> avatar, favicon, app, marca d'água
+Monograma "GO"  -> usos compactos / destaque de marca
+
+DICA: mantém sempre uma margem livre à volta do logo (≈ metade da altura
+do símbolo) e não o esticues — escala proporcionalmente.

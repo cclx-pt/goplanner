@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/core/auth/client";
+import { LogoFull } from "@/components/Logo";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function SignInPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center p-8">
+      <LogoFull className="mb-6 h-auto w-52 self-center" />
       <h1 className="text-2xl font-bold text-brand-navy">Iniciar sessão</h1>
       <p className="mt-1 text-sm text-gray-500">Bem-vindo de volta ao Go Planner.</p>
 

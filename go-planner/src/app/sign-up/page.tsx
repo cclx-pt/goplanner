@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/core/auth/client";
+import { LogoFull } from "@/components/Logo";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -29,11 +30,8 @@ export default function SignUpPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center p-8">
+      <LogoFull className="mb-6 h-auto w-52 self-center" />
       <h1 className="text-2xl font-bold text-brand-navy">Criar conta</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        <span className="text-brand-navy">Organize today. </span>
-        <span className="text-brand-green">Impact tomorrow.</span>
-      </p>
 
       <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm">

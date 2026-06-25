@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getAccessState } from "@/core/access/context";
 import { createOrganizationAction } from "./actions";
+import { LogoMark } from "@/components/Logo";
 
 export default async function BootstrapPage() {
   const state = await getAccessState();
@@ -9,6 +10,7 @@ export default async function BootstrapPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center p-8">
+      <LogoMark size={40} className="mb-4" />
       <h1 className="text-2xl font-bold text-brand-navy">Criar a tua organização</h1>
       <p className="mt-1 text-sm text-gray-500">
         Olá{state.name ? `, ${state.name}` : ""}. Dá um nome à tua organização

@@ -11,10 +11,11 @@
 tenancy, RBAC, resolução de acesso central (`can()`), contrato de módulo,
 registo de módulos e um módulo de exemplo (Escalas).
 
-**Estado:** ✅ **schema aplicado à base de dados (15 tabelas)** — 9 do núcleo
-+ 6 do módulo Escalas. A Fase 0 está operacional ponta-a-ponta.
+**Estado:** ✅ Fase 0 completa **e Fase 1 passos 1–4 completos** — autenticação
+(Better Auth), bootstrap da organização, painel de admin e navegação dos
+módulos filtrada por `can()`. Verificado ponta-a-ponta no browser.
 
-**A seguir:** arrancar a **Fase 1** (autenticação real + painel de admin).
+**A seguir:** **Fase 1 passo 5** — ecrãs funcionais do módulo Escalas.
 
 ---
 
@@ -97,17 +98,28 @@ npm run db:studio              # inspecionar os dados no browser
 
 ---
 
-## A seguir (Fase 1 — MVP)
+## Fase 1 — MVP (passos 1–4 ✅)
 
-- [x] ~~Desbloquear `db:push`~~ — schema aplicado, **15 tabelas** criadas. ✅
-- [ ] **Autenticação real** com Better Auth — gerar tabelas de auth
-      (`user`, `session`, `account`, `verification`) e ligar ao Drizzle;
-      definir `BETTER_AUTH_SECRET`.
-- [ ] **Painel de administração** — gestão de organização, comunidades, roles e
-      memberships.
-- [ ] Ligar a **navegação** e os **widgets** declarados pelos módulos à UI
-      (consumir o registo + filtrar por `can()`).
-- [ ] Primeira versão funcional do módulo **Escalas**.
+- [x] **Autenticação real** (Better Auth, email+password) — tabelas
+      `user/session/account/verification` ([src/core/auth/schema.ts](src/core/auth/schema.ts)),
+      adapter Drizzle + `nextCookies` ([src/core/auth/index.ts](src/core/auth/index.ts)),
+      handler em [src/app/api/auth](src/app/api/auth), cliente
+      ([src/core/auth/client.ts](src/core/auth/client.ts)) e páginas
+      [sign-in](src/app/sign-in/page.tsx) / [sign-up](src/app/sign-up/page.tsx).
+- [x] **Bootstrap + sync** — a primeira organização torna o utilizador admin
+      ([src/app/bootstrap/actions.ts](src/app/bootstrap/actions.ts)); sincroniza
+      módulos+permissões e ativa-os ([src/core/modules/sync.ts](src/core/modules/sync.ts)).
+      Ligação auth↔domínio por `users.auth_user_id`.
+- [x] **Painel de administração** — comunidades, membros, roles (+ editor de
+      permissões) e ativar/desativar módulos, em [src/app/admin](src/app/admin),
+      com guarda `requireOrgAdmin` ([src/app/admin/guard.ts](src/app/admin/guard.ts)).
+- [x] **Navegação dos módulos via registo + `can()`** — contexto de acesso
+      ([src/core/access/context.ts](src/core/access/context.ts)) e dashboard
+      ([src/app/dashboard/page.tsx](src/app/dashboard/page.tsx)).
+
+### A seguir
+- [ ] **Passo 5:** ecrãs funcionais do módulo **Escalas** (rotas `/escalas`).
+- [ ] Convidar/associar membros (criar membership a partir de utilizador auth).
 
 ### Roadmap (resumo)
 - **Fase 2:** Eventos/Calendário, Grupos, Presenças, Comunicação.
@@ -125,7 +137,10 @@ npm run db:studio              # inspecionar os dados no browser
 | Acesso `can()` | [src/core/access/can.ts](src/core/access/can.ts) | ✅ |
 | Contrato de módulo | [src/core/modules/contract.ts](src/core/modules/contract.ts) | ✅ |
 | Registo de módulos | [src/core/modules/registry.ts](src/core/modules/registry.ts) | ✅ |
-| Auth (esqueleto) | [src/core/auth/index.ts](src/core/auth/index.ts) | 🟡 esqueleto |
-| Módulo Escalas | [src/modules/escalas/manifest.ts](src/modules/escalas/manifest.ts) | ✅ |
+| Autenticação (Better Auth) | [src/core/auth/index.ts](src/core/auth/index.ts) | ✅ login/sessões |
+| Bootstrap + sync módulos | [src/app/bootstrap/actions.ts](src/app/bootstrap/actions.ts) | ✅ |
+| Painel de admin | [src/app/admin](src/app/admin) | ✅ comunidades/membros/roles/módulos |
+| Nav por registo + `can()` | [src/app/dashboard/page.tsx](src/app/dashboard/page.tsx) | ✅ |
+| Módulo Escalas | [src/modules/escalas/manifest.ts](src/modules/escalas/manifest.ts) | 🟡 manifesto/schema (ecrãs = passo 5) |
 | Ligação à BD | `.env` | ✅ ligado (direta; pooler IPv4 opcional) |
-| Aplicar schema à BD | — | ✅ 15 tabelas (`push --force`) |
+| Aplicar schema à BD | — | ✅ 19 tabelas (15 + 4 auth, `push --force`) |
