@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Go Planner — design tokens da marca.
+   Cores aproximadas extraídas do logótipo. Ajusta os hex se tiveres
+   os valores exatos da tua identidade visual. */
+@theme {
+  --color-brand-navy: #1f2a44;
+  --color-brand-green: #2bb673;
+  --color-brand-blue: #2d7dd2;
+  --color-brand-purple: #7b5cc4;
+  --color-brand-amber: #f5a623;
+}
