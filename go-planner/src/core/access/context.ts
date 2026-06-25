@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/core/db";
-import { users, memberships, roles } from "@/core/db/schema";
+import { users, memberships, roles, organizations } from "@/core/db/schema";
 import { getAuthSession } from "@/core/auth/session";
 import { can } from "./can";
 
@@ -12,6 +12,7 @@ export interface AccessContext {
   /** Id do utilizador de DOMÍNIO (memberships.userId), não o do Better Auth. */
   domainUserId: string;
   organizationId: string;
+  organizationName: string;
   isOrgAdmin: boolean;
   /** Comunidade "ativa" para scoping da UI (primeira membership de comunidade). */
   activeCommunityId: string | null;
@@ -35,8 +36,13 @@ export async function getAccessState(): Promise<AccessState> {
   if (!session) return { status: "anon" };
 
   const [u] = await db
-    .select({ id: users.id, organizationId: users.organizationId })
+    .select({
+      id: users.id,
+      organizationId: users.organizationId,
+      organizationName: organizations.name,
+    })
     .from(users)
+    .innerJoin(organizations, eq(users.organizationId, organizations.id))
     .where(eq(users.authUserId, session.user.id))
     .limit(1);
 
@@ -66,6 +72,7 @@ export async function getAccessState(): Promise<AccessState> {
       name: session.user.name ?? null,
       domainUserId: u.id,
       organizationId: u.organizationId,
+      organizationName: u.organizationName,
       isOrgAdmin,
       activeCommunityId,
       memberships: mems,
