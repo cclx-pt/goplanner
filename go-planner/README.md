@@ -37,7 +37,7 @@ Três camadas:
    de módulos. É o teu código, não vem de bibliotecas.
 2. **Tenancy & acessos** — organização → comunidades; resolução de acesso por
    `role × âmbito × módulo`.
-3. **Módulos** — Escalas, Eventos, Pessoas, etc. Registados via manifesto e
+3. **Módulos** — Eventos, Pessoas, etc. Registados via manifesto e
    geridos por acesso.
 
 O princípio central: **o módulo declara, a plataforma orquestra.** Nenhum módulo
@@ -56,7 +56,7 @@ Paleta (tokens definidos em `src/app/globals.css`, usáveis como
 | `brand-green` | `#2BB673` | Comunidades, sucesso |
 | `brand-blue` | `#2D7DD2` | Acessos, informação |
 | `brand-purple` | `#7B5CC4` | Módulos |
-| `brand-amber` | `#F5A623` | Escalas, avisos |
+| `brand-amber` | `#F5A623` | Destaques, avisos |
 
 > Os hex são aproximados ao logótipo. Se tiveres os valores exatos da identidade
 > visual, ajusta-os no bloco `@theme` de `globals.css`.
@@ -139,17 +139,16 @@ go-planner/
     │   ├── access/
     │   │   ├── can.ts         Serviço central de resolução de acesso
     │   │   └── types.ts
-    │   └── modules/
-    │       ├── contract.ts    Tipos do ModuleManifest + defineModule()
-    │       └── registry.ts    Registo + validação de dependências
-    └── modules/              Os módulos da igreja
-        └── escalas/          Exemplo: manifesto + schema interno
-            ├── manifest.ts
-            └── schema.ts
+    │   ├── modules/
+    │   │   ├── contract.ts    Tipos do ModuleManifest + defineModule()
+    │   │   └── registry.ts    Registo + validação de dependências
+    │   └── platform/
+    │       └── access.ts      Torre de controlo: admins de plataforma (allowlist)
+    └── modules/              Os módulos da igreja (ainda vazio)
 ```
 
 **Por onde começar a ler:** `docs/architecture.md` → `src/core/db/schema.ts` →
-`src/core/access/can.ts` → `src/modules/escalas/manifest.ts`.
+`src/core/access/can.ts` → `src/core/modules/contract.ts`.
 
 ---
 
@@ -178,7 +177,8 @@ Detalhe completo em `docs/access-model.md`.
    adiciona-o à lista `MODULES`.
 5. Corre `npm run db:generate` e `npm run db:migrate` para as novas tabelas.
 
-Usa `src/modules/escalas/` como modelo.
+Consulta o contrato em `src/core/modules/contract.ts` para todos os campos
+disponíveis.
 
 ---
 
@@ -218,7 +218,7 @@ O `.gitignore` já protege o `.env` e o `node_modules`.
 
 - **Fase 0 — Fundação** *(coberta por este esqueleto)*: tenancy, comunidades,
   RBAC, resolução de acesso, registo de módulos.
-- **Fase 1 — MVP**: autenticação real, painel de admin, módulo **Escalas**.
+- **Fase 1 — MVP**: autenticação real, painel de admin (Admin control tower).
 - **Fase 2**: **Eventos/Calendário**, Grupos, Presenças, Comunicação.
 - **Fase 3**: Doações, Portal do membro, Relatórios.
 - **Fase 4+**: Cuidado Pastoral, Worship, Discipulado, Sermões.

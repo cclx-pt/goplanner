@@ -15,7 +15,7 @@ Quando um utilizador tenta uma ação num módulo, o serviço `can()`
 
 ## Permissões
 
-Formato: `modulo.recurso.acao` (ex.: `escalas.escala.editar`).
+Formato: `modulo.recurso.acao` (ex.: `eventos.evento.editar`).
 
 A permissão diz apenas **o quê**. O **onde** (a comunidade) vem da membership,
 aplicado no passo 3 da resolução — nunca embutas o âmbito no nome da permissão.
@@ -31,3 +31,13 @@ automaticamente.
 
 Esta resolução vive num único sítio. Nenhum módulo a reimplementa: todos chamam
 `can()`. Uma correção de segurança faz-se num lugar só.
+
+## Plataforma (torre de controlo)
+
+Os **admins de plataforma** são uma camada à parte, ACIMA das organizações
+(staff que gere todos os tenants). **NÃO** passam pelo `can()` — este é scoped a
+org/comunidade. O acesso é provisionado por allowlist de emails
+(`PLATFORM_ADMIN_EMAILS`): quem está na lista é ativado (JIT) no primeiro acesso
+a `/platform`, e o primeiro de todos fica `owner`. Resolução em
+`src/core/platform/access.ts`; guarda `requirePlatformAdmin` em
+`src/app/platform/guard.ts`.

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAccessState } from "@/core/access/context";
+import { isPlatformCandidate } from "@/core/platform/access";
 import { createOrganizationAction } from "./actions";
 import { LogoMark } from "@/components/Logo";
 
@@ -7,6 +8,8 @@ export default async function BootstrapPage() {
   const state = await getAccessState();
   if (state.status === "anon") redirect("/sign-in");
   if (state.status === "ok") redirect("/dashboard");
+  // Staff da plataforma não é forçado a criar organização.
+  if (await isPlatformCandidate()) redirect("/platform");
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center p-8">

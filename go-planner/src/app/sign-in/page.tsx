@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/core/auth/client";
 import { LogoFull } from "@/components/Logo";
 
 export default function SignInPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +21,9 @@ export default function SignInPage() {
       setError(error.message ?? "Não foi possível iniciar sessão.");
       return;
     }
-    router.push("/");
-    router.refresh();
+    // Navegação "dura" para a raiz: o servidor encaminha para o destino certo
+    // (dashboard / plataforma / bootstrap). Evita o estado preso na soft-nav.
+    window.location.href = "/";
   }
 
   return (

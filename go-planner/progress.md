@@ -8,14 +8,19 @@
 ## Resumo
 
 **Fase 0 — Fundação: completa.** O esqueleto do *modular monolith* está montado:
-tenancy, RBAC, resolução de acesso central (`can()`), contrato de módulo,
-registo de módulos e um módulo de exemplo (Escalas).
+tenancy, RBAC, resolução de acesso central (`can()`), contrato de módulo e
+registo de módulos.
 
 **Estado:** ✅ Fase 0 completa **e Fase 1 passos 1–4 completos** — autenticação
 (Better Auth), bootstrap da organização, painel de admin e navegação dos
 módulos filtrada por `can()`. Verificado ponta-a-ponta no browser.
 
-**A seguir:** **Fase 1 passo 5** — ecrãs funcionais do módulo Escalas.
+**Admin control tower (camada de plataforma): base montada.** Há agora uma camada
+**acima das organizações** — staff que gere todos os tenants — em `/platform`,
+separada dos admins de organização. Provisionada por allowlist de emails
+(`PLATFORM_ADMIN_EMAILS`), com provisionamento JIT no 1.º acesso.
+
+**A seguir:** enriquecer a torre de controlo (detalhe por tenant, gerir staff).
 
 ---
 
@@ -45,15 +50,15 @@ módulos filtrada por `can()`. Verificado ponta-a-ponta no browser.
       permissões — [src/core/modules/registry.ts](src/core/modules/registry.ts).
 - [x] **Esqueleto de autenticação** (Better Auth, só identidade/sessões) —
       [src/core/auth/index.ts](src/core/auth/index.ts).
+- [x] **Camada de plataforma** (torre de controlo) — tabela `platform_admins` e
+      resolução + provisionamento JIT por allowlist
+      ([src/core/platform/access.ts](src/core/platform/access.ts)).
 
-### Módulo de exemplo — Escalas (`src/modules/escalas`)
-- [x] **Manifesto** (permissões, navegação, eventos, settings, lifecycle) —
-      [src/modules/escalas/manifest.ts](src/modules/escalas/manifest.ts).
-- [x] **Schema interno** (`esc_teams`, `esc_positions`, `esc_occasions`,
-      `esc_slots`, `esc_assignments`, `esc_availability`) —
-      [src/modules/escalas/schema.ts](src/modules/escalas/schema.ts).
-      `person_id` é referência estável ao núcleo; `event_id` é gancho opcional
-      para um futuro módulo Eventos.
+### Módulos (`src/modules`)
+- Sem módulos registados. O módulo de exemplo (Escalas) foi **removido** — app e
+  base de dados — para focar primeiro no **Admin control tower**. O registo
+  ([src/core/modules/registry.ts](src/core/modules/registry.ts)) está vazio e
+  pronto a receber novos módulos via `defineModule()`.
 
 ### Configuração & documentação
 - [x] **Drizzle config** a apanhar núcleo + todos os módulos —
@@ -67,8 +72,8 @@ módulos filtrada por `can()`. Verificado ponta-a-ponta no browser.
 
 ## Base de dados (resolvida)
 
-Schema aplicado com sucesso — **15 tabelas** (9 do núcleo + 6 do módulo Escalas),
-com chaves estrangeiras e índices.
+Schema aplicado com sucesso — **14 tabelas** (9 RBAC + 1 de plataforma
+`platform_admins` + 4 de auth), com chaves estrangeiras e índices.
 
 ### O que correu mal e como se resolveu
 1. ✅ `DATABASE_URL` malformado (aspas a fechar sem abrir + host `.com`) — corrigido.
@@ -116,9 +121,16 @@ npm run db:studio              # inspecionar os dados no browser
 - [x] **Navegação dos módulos via registo + `can()`** — contexto de acesso
       ([src/core/access/context.ts](src/core/access/context.ts)) e dashboard
       ([src/app/dashboard/page.tsx](src/app/dashboard/page.tsx)).
+- [x] **Admin control tower (camada de plataforma)** — staff que gere TODOS os
+      tenants, acima das organizações, em [src/app/platform](src/app/platform)
+      (visão geral, organizações, admins), com guarda `requirePlatformAdmin`
+      ([src/app/platform/guard.ts](src/app/platform/guard.ts)). Acesso por
+      allowlist `PLATFORM_ADMIN_EMAILS` (provisionamento JIT no 1.º acesso). Não
+      passa pelo `can()`.
 
 ### A seguir
-- [ ] **Passo 5:** ecrãs funcionais do módulo **Escalas** (rotas `/escalas`).
+- [ ] **Torre de controlo:** detalhe por tenant, gerir/convidar staff (em vez de
+      só allowlist), métricas.
 - [ ] Convidar/associar membros (criar membership a partir de utilizador auth).
 
 ### Roadmap (resumo)
@@ -141,6 +153,6 @@ npm run db:studio              # inspecionar os dados no browser
 | Bootstrap + sync módulos | [src/app/bootstrap/actions.ts](src/app/bootstrap/actions.ts) | ✅ |
 | Painel de admin | [src/app/admin](src/app/admin) | ✅ comunidades/membros/roles/módulos |
 | Nav por registo + `can()` | [src/app/dashboard/page.tsx](src/app/dashboard/page.tsx) | ✅ |
-| Módulo Escalas | [src/modules/escalas/manifest.ts](src/modules/escalas/manifest.ts) | 🟡 manifesto/schema (ecrãs = passo 5) |
+| Plataforma (torre de controlo) | [src/core/platform/access.ts](src/core/platform/access.ts) · [src/app/platform](src/app/platform) | ✅ allowlist + JIT |
 | Ligação à BD | `.env` | ✅ ligado (direta; pooler IPv4 opcional) |
-| Aplicar schema à BD | — | ✅ 19 tabelas (15 + 4 auth, `push --force`) |
+| Aplicar schema à BD | — | ✅ 14 tabelas (9 RBAC + 1 plataforma + 4 auth) |
