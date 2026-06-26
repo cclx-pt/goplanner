@@ -87,7 +87,7 @@ export const memberships = pgTable(
 
 export const modules = pgTable("modules", {
   id: uuid("id").primaryKey().defaultRandom(),
-  // Chave estável do módulo, ex.: 'escalas', 'eventos', 'pessoas'.
+  // Chave estável do módulo, ex.: 'eventos', 'pessoas'.
   key: text("key").notNull().unique(),
   name: text("name").notNull(),
 });
@@ -116,7 +116,7 @@ export const permissions = pgTable(
     moduleId: uuid("module_id")
       .notNull()
       .references(() => modules.id),
-    // Formato: modulo.recurso.acao  (ex.: 'escalas.escala.editar')
+    // Formato: modulo.recurso.acao  (ex.: 'eventos.evento.editar')
     key: text("key").notNull().unique(),
     label: text("label").notNull(),
   },
@@ -139,3 +139,24 @@ export const rolePermissions = pgTable(
     pk: primaryKey({ columns: [t.roleId, t.permissionId] }),
   }),
 );
+
+/**
+ * Administradores de PLATAFORMA — a "torre de controlo".
+ *
+ * Camada SEPARADA e ACIMA das organizações: staff que gere todos os tenants.
+ * Não pertence a nenhuma organização — por isso NÃO usa `users`/`memberships`
+ * (que são scoped a um tenant). A identidade vem do Better Auth (`auth.user.id`);
+ * o provisionamento inicial é por allowlist de emails (env `PLATFORM_ADMIN_EMAILS`).
+ */
+export const platformAdmins = pgTable("platform_admins", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  authUserId: text("auth_user_id")
+    .notNull()
+    .unique()
+    .references(() => authUser.id),
+  email: text("email").notNull(),
+  name: text("name"),
+  // Nível na plataforma: 'owner' (o primeiro; pode gerir staff) | 'admin'.
+  role: text("role").notNull().default("admin"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});

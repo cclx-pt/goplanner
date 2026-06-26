@@ -20,8 +20,14 @@ Plataforma modular de gestão de igreja, construída como **modular monolith**.
   é many-to-many — admins de comunidade podem ter várias memberships sem mexer
   no esquema.
 
-## Dois níveis de administração
+## Níveis de administração
 
+- **Admin de plataforma (torre de controlo)** — camada SEPARADA e ACIMA das
+  organizações: staff que gere todos os tenants. Não pertence a nenhuma
+  organização (não usa `users`/`memberships`); a identidade vem do Better Auth e
+  o acesso é provisionado por allowlist de emails (`PLATFORM_ADMIN_EMAILS`). Vive
+  em `src/core/platform` + `src/app/platform`. **NÃO** passa pelo `can()` (que é
+  scoped a org/comunidade).
 - **Admin de organização** — `MEMBERSHIP` com `community_id` NULL e
   `role.isOrgAdmin = true`. Vê toda a organização (atalho org-wide no `can()`).
 - **Admin de comunidade** — uma `MEMBERSHIP` por comunidade que administra. Role
@@ -31,8 +37,7 @@ Plataforma modular de gestão de igreja, construída como **modular monolith**.
 
 Cada módulo declara um `ModuleManifest` (`src/core/modules/contract.ts`):
 identidade + dependências, permissões, navegação, widgets, eventos, definições e
-lifecycle. A plataforma lê o manifesto e orquestra tudo. Ver
-`src/modules/escalas/manifest.ts` como exemplo.
+lifecycle. A plataforma lê o manifesto e orquestra tudo.
 
 Regra de scoping: toda a entidade de módulo carrega `organization_id` +
 `community_id`.
