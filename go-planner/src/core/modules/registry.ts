@@ -1,5 +1,4 @@
 import type { ModuleManifest } from "./contract";
-import escalas from "@/modules/escalas/manifest";
 
 /**
  * Registo de módulos da plataforma.
@@ -8,7 +7,7 @@ import escalas from "@/modules/escalas/manifest";
  * (Numa fase posterior, isto pode passar a auto-descoberta por convenção de
  * pastas — por agora, a lista explícita é simples e clara.)
  */
-const MODULES: ModuleManifest[] = [escalas];
+const MODULES: ModuleManifest[] = [];
 
 /** Devolve todos os módulos registados, indexados por chave. */
 export function getModuleRegistry(): Map<string, ModuleManifest> {

@@ -1,0 +1,42 @@
+name: CI
+
+# Portões de qualidade antes do merge. O DEPLOY é feito pela Vercel
+# (integração Git), não aqui — este workflow só valida o código.
+on:
+  pull_request:
+    branches: [main, qa, develop]
+  push:
+    branches: [main, qa, develop]
+
+# Cancela execuções antigas do mesmo branch/PR para poupar minutos.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck & Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # A app vive na subpasta go-planner/ (a raiz do repo é o nível acima).
+        working-directory: go-planner
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: go-planner/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: Lint
+        run: npm run lint

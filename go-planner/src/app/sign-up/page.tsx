@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/core/auth/client";
 import { LogoFull } from "@/components/Logo";
 
 export default function SignUpPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,8 +22,7 @@ export default function SignUpPage() {
       setError(error.message ?? "Não foi possível criar a conta.");
       return;
     }
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   }
 
   return (

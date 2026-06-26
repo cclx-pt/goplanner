@@ -2,6 +2,7 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/core/db";
 import { users, memberships, roles, communities } from "@/core/db/schema";
 import { requireOrgAdmin } from "../guard";
+import { createMemberAction } from "./actions";
 
 export default async function MembersPage() {
   const ctx = await requireOrgAdmin();
@@ -39,12 +40,69 @@ export default async function MembersPage() {
     byUser.set(m.userId, arr);
   }
 
+  const roleRows = await db
+    .select({ id: roles.id, name: roles.name, isOrgAdmin: roles.isOrgAdmin })
+    .from(roles)
+    .where(eq(roles.organizationId, ctx.organizationId))
+    .orderBy(asc(roles.name));
+
   return (
     <div>
       <h1 className="text-xl font-bold text-brand-navy">Membros</h1>
       <p className="mt-1 text-sm text-gray-500">
         Utilizadores da organização e as suas memberships (role × comunidade).
       </p>
+
+      <form
+        action={createMemberAction}
+        className="mt-5 grid gap-2 rounded-lg border border-gray-200 bg-white p-4 sm:grid-cols-2"
+      >
+        <input
+          name="name"
+          required
+          placeholder="Nome"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-blue"
+        />
+        <input
+          name="email"
+          type="email"
+          required
+          placeholder="email@exemplo.pt"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-blue"
+        />
+        <input
+          name="password"
+          type="password"
+          required
+          minLength={8}
+          placeholder="Palavra-passe (mín. 8)"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-blue"
+        />
+        <select
+          name="roleId"
+          required
+          defaultValue=""
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm text-brand-navy outline-none focus:border-brand-blue"
+        >
+          <option value="" disabled>
+            Role…
+          </option>
+          {roleRows.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+              {r.isOrgAdmin ? " (admin)" : ""}
+            </option>
+          ))}
+        </select>
+        <div className="sm:col-span-2">
+          <button
+            type="submit"
+            className="rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+          >
+            Adicionar utilizador
+          </button>
+        </div>
+      </form>
 
       <ul className="mt-5 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
         {userRows.map((u) => {
@@ -79,7 +137,8 @@ export default async function MembersPage() {
       </ul>
 
       <p className="mt-4 text-xs text-gray-400">
-        Convidar/associar novos membros chega numa iteração seguinte.
+        A membership é criada ao nível da organização. Partilha a palavra-passe
+        com o utilizador (pode alterá-la depois).
       </p>
     </div>
   );

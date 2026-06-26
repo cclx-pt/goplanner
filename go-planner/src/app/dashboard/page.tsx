@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import {
   getAccessState,
   canHere,
   type AccessContext,
 } from "@/core/access/context";
 import { getModuleRegistry } from "@/core/modules/registry";
-import { SignOutButton } from "./SignOutButton";
+import { getPlatformAdmin } from "@/core/platform/access";
+import { SignOutButton } from "@/components/SignOutButton";
+import { TopNav, type NavItem } from "@/components/TopNav";
+import { Footer } from "@/components/Footer";
 import { LogoMark } from "@/components/Logo";
 
 /** Itens de navegação contribuídos pelos módulos, filtrados por can(). */
@@ -26,6 +28,7 @@ async function visibleNav(ctx: AccessContext) {
 }
 
 const ADMIN_LINKS = [
+  { href: "/admin/organization", label: "Organização" },
   { href: "/admin/communities", label: "Comunidades" },
   { href: "/admin/members", label: "Membros" },
   { href: "/admin/roles", label: "Roles" },
@@ -37,30 +40,71 @@ export default async function DashboardPage() {
   if (state.status === "anon") redirect("/sign-in");
   if (state.status === "unbootstrapped") redirect("/bootstrap");
   const { ctx } = state;
-  const nav = await visibleNav(ctx);
+  const platformAdmin = await getPlatformAdmin();
+  const isAdmin = ctx.isOrgAdmin || platformAdmin !== null;
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3">
-        <div className="flex items-center gap-2">
-          <LogoMark size={32} />
-          <span className="font-bold text-brand-navy">Go Planner</span>
-          <span className="text-sm text-gray-400">·</span>
-          <span className="text-sm text-gray-600">{ctx.organizationName}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">{ctx.name ?? ctx.email}</span>
+  // A torre de controlo é reservada a administradores (não a membros da igreja).
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6 text-center">
+        <LogoMark size={40} className="mb-4" />
+        <h1 className="text-xl font-bold text-brand-navy">Acesso restrito</h1>
+        <p className="mt-2 max-w-sm text-sm text-gray-600">
+          Esta área é reservada a administradores. A tua conta não tem acesso a
+          esta área.
+        </p>
+        <div className="mt-5">
           <SignOutButton />
         </div>
-      </header>
+      </div>
+    );
+  }
 
-      <main className="mx-auto max-w-4xl p-6">
+  const moduleNav = await visibleNav(ctx);
+
+  const topNav: NavItem[] = [
+    { label: "Minha página", href: "/dashboard" },
+    ...moduleNav.map((n) => ({ label: n.label, href: n.route })),
+    ...(ctx.isOrgAdmin
+      ? [
+          {
+            label: "Administração",
+            children: ADMIN_LINKS.map((l) => ({ label: l.label, href: l.href })),
+          },
+        ]
+      : []),
+    ...(platformAdmin
+      ? [
+          {
+            label: "Plataforma",
+            children: [
+              { label: "Visão geral", href: "/platform" },
+              { label: "Organizações", href: "/platform/organizations" },
+              { label: "Administradores", href: "/platform/admins" },
+            ],
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <div className="flex min-h-screen flex-col bg-gray-50">
+      <TopNav
+        nav={topNav}
+        user={{ name: ctx.name, email: ctx.email }}
+        breadcrumb={[
+          { label: ctx.organizationName, href: "/dashboard" },
+          { label: "Minha página" },
+        ]}
+      />
+
+      <main className="mx-auto w-full max-w-5xl flex-1 p-6">
         <h1 className="text-2xl font-bold text-brand-navy">
           Olá{ctx.name ? `, ${ctx.name}` : ""}.
         </h1>
         {ctx.isOrgAdmin && (
           <p className="mt-1 text-sm text-brand-blue">
-            És administrador da organização.
+            És administrador da organização — {ctx.organizationName}.
           </p>
         )}
 
@@ -68,13 +112,13 @@ export default async function DashboardPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
             Módulos
           </h2>
-          {nav.length === 0 ? (
+          {moduleNav.length === 0 ? (
             <p className="mt-2 text-sm text-gray-500">
               Sem módulos visíveis para o teu nível de acesso.
             </p>
           ) : (
             <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {nav.map((item) => (
+              {moduleNav.map((item) => (
                 <li
                   key={`${item.moduleKey}:${item.route}`}
                   className="rounded-lg border border-gray-200 bg-white p-4"
@@ -88,27 +132,9 @@ export default async function DashboardPage() {
             </ul>
           )}
         </section>
-
-        {ctx.isOrgAdmin && (
-          <section className="mt-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Administração
-            </h2>
-            <ul className="mt-3 flex flex-wrap gap-3">
-              {ADMIN_LINKS.map((l) => (
-                <li key={l.href}>
-                  <Link
-                    href={l.href}
-                    className="inline-block rounded-md bg-brand-navy px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
       </main>
+
+      <Footer />
     </div>
   );
 }

@@ -1,0 +1,13 @@
+{
+  // Servidores MCP partilhados com a equipa (workspace).
+  // O Vercel MCP é remoto (HTTP + OAuth). Depois de o VS Code o detetar:
+  //   1. Command Palette → "MCP: List Servers" → Vercel → Start Server
+  //   2. Autoriza o acesso à tua conta Vercel quando for pedido.
+  // Endpoint oficial (verificar sempre): https://mcp.vercel.com
+  "servers": {
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    }
+  }
+}
