@@ -1,7 +1,7 @@
 /** Pedido de acesso a avaliar pela resolução. */
 export interface AccessRequest {
-  /** Utilizador que faz o pedido. */
-  userId: string;
+  /** Conta GLOBAL (Better Auth user.id) que faz o pedido. */
+  accountId: string;
   /** Organização (tenant) do pedido. */
   organizationId: string;
   /** Permissão necessária, ex.: 'eventos.evento.editar'. */

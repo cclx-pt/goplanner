@@ -3,26 +3,45 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/core/db";
-import { organizations } from "@/core/db/schema";
+import { organizations, memberships } from "@/core/db/schema";
+import { getAuthSession } from "@/core/auth/session";
 import { getPlatformAdmin } from "@/core/platform/access";
-import { ACTIVE_ORG_COOKIE } from "./guard";
+import { ACTIVE_ORG_COOKIE } from "@/core/access/context";
 
 /**
- * Define a organização ATIVA. Reservado a admins de plataforma (master) — um
- * admin de organização normal nunca troca de org. Devolve true se aplicada.
+ * Define o TENANT ativo (cookie). Um admin de plataforma (master) pode escolher
+ * QUALQUER organização; uma conta normal só os tenants onde tem membership.
+ * Devolve true se aplicada.
  */
 async function setActiveOrg(orgId: string): Promise<boolean> {
-  const platformAdmin = await getPlatformAdmin();
-  if (!platformAdmin || !orgId) return false;
+  if (!orgId) return false;
 
-  const [org] = await db
-    .select({ id: organizations.id })
-    .from(organizations)
-    .where(eq(organizations.id, orgId))
-    .limit(1);
-  if (!org) return false;
+  const platformAdmin = await getPlatformAdmin();
+  if (platformAdmin) {
+    const [org] = await db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.id, orgId))
+      .limit(1);
+    if (!org) return false;
+  } else {
+    // Conta normal: só pode ativar tenants onde é membro.
+    const session = await getAuthSession();
+    if (!session) return false;
+    const [mem] = await db
+      .select({ id: memberships.id })
+      .from(memberships)
+      .where(
+        and(
+          eq(memberships.accountId, session.user.id),
+          eq(memberships.organizationId, orgId),
+        ),
+      )
+      .limit(1);
+    if (!mem) return false;
+  }
 
   (await cookies()).set(ACTIVE_ORG_COOKIE, orgId, {
     httpOnly: true,

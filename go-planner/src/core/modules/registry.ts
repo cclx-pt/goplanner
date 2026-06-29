@@ -1,4 +1,18 @@
 import type { ModuleManifest } from "./contract";
+import { pessoasModule } from "@/modules/pessoas/module";
+import { doacoesModule } from "@/modules/doacoes/module";
+import { checkinModule } from "@/modules/checkin/module";
+import { comunicacaoModule } from "@/modules/comunicacao/module";
+import { eventosModule } from "@/modules/eventos/module";
+import { gruposModule } from "@/modules/grupos/module";
+import { financasModule } from "@/modules/financas/module";
+import { relatoriosModule } from "@/modules/relatorios/module";
+import { cuidadoModule } from "@/modules/cuidado/module";
+import { instalacoesModule } from "@/modules/instalacoes/module";
+import { missoesModule } from "@/modules/missoes/module";
+import { mediaModule } from "@/modules/media/module";
+import { campusModule } from "@/modules/campus/module";
+import { campanhasModule } from "@/modules/campanhas/module";
 
 /**
  * Registo de módulos da plataforma.
@@ -7,7 +21,7 @@ import type { ModuleManifest } from "./contract";
  * (Numa fase posterior, isto pode passar a auto-descoberta por convenção de
  * pastas — por agora, a lista explícita é simples e clara.)
  */
-const MODULES: ModuleManifest[] = [];
+const MODULES: ModuleManifest[] = [pessoasModule, doacoesModule, checkinModule, comunicacaoModule, eventosModule, gruposModule, financasModule, relatoriosModule, cuidadoModule, instalacoesModule, missoesModule, mediaModule, campusModule, campanhasModule];
 
 /** Devolve todos os módulos registados, indexados por chave. */
 export function getModuleRegistry(): Map<string, ModuleManifest> {

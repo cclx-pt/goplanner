@@ -1,6 +1,6 @@
 import { count, eq } from "drizzle-orm";
 import { db } from "@/core/db";
-import { organizations, communities, users } from "@/core/db/schema";
+import { organizations, communities, people } from "@/core/db/schema";
 import { requireOrgAdmin } from "../guard";
 
 /**
@@ -26,8 +26,8 @@ export default async function OrganizationPage() {
       .where(eq(communities.organizationId, ctx.organizationId)),
     db
       .select({ value: count() })
-      .from(users)
-      .where(eq(users.organizationId, ctx.organizationId)),
+      .from(people)
+      .where(eq(people.organizationId, ctx.organizationId)),
   ]);
 
   const rows: { label: string; value: string }[] = [
@@ -38,7 +38,11 @@ export default async function OrganizationPage() {
       value: org ? org.createdAt.toLocaleDateString("pt-PT") : "—",
     },
     { label: "Comunidades", value: String(commCount?.value ?? 0) },
-    { label: "Utilizadores", value: String(userCount?.value ?? 0) },
+    { label: "Pessoas", value: String(userCount?.value ?? 0) },
+    { label: "Idioma / locale", value: org?.locale ?? "—" },
+    { label: "Moeda", value: org?.currency ?? "—" },
+    { label: "País", value: org?.country ?? "—" },
+    { label: "Fuso horário", value: org?.timezone ?? "—" },
   ];
 
   return (

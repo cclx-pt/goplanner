@@ -46,6 +46,25 @@ export async function renameOrganizationAction(
   revalidatePath(`/platform/organizations/${orgId}`);
 }
 
+/** Atualizar a região/localização (locale, moeda, país, fuso) de uma org. */
+export async function setOrgRegionAction(formData: FormData): Promise<void> {
+  const platformAdmin = await getPlatformAdmin();
+  if (!platformAdmin) return;
+
+  const orgId = String(formData.get("orgId") ?? "");
+  const locale = String(formData.get("locale") ?? "").trim();
+  const currency = String(formData.get("currency") ?? "").trim().toUpperCase();
+  const country = String(formData.get("country") ?? "").trim().toUpperCase();
+  const timezone = String(formData.get("timezone") ?? "").trim();
+  if (!orgId || !locale || !currency || !country || !timezone) return;
+
+  await db
+    .update(organizations)
+    .set({ locale, currency, country, timezone })
+    .where(eq(organizations.id, orgId));
+  revalidatePath(`/platform/organizations/${orgId}`);
+}
+
 /**
  * Eliminar uma organização e TUDO abaixo dela.
  *
@@ -77,8 +96,43 @@ export async function deleteOrganizationAction(
     await tx.execute(
       sql`DELETE FROM role_permissions WHERE role_id IN (SELECT id FROM roles WHERE organization_id = ${orgId})`,
     );
+    // Consentimentos (FK para people/org) -> apagar antes de people.
+    await tx.execute(sql`DELETE FROM consents WHERE organization_id = ${orgId}`);
     await tx.execute(
-      sql`DELETE FROM memberships WHERE user_id IN (SELECT id FROM users WHERE organization_id = ${orgId}) OR community_id IN (SELECT id FROM communities WHERE organization_id = ${orgId}) OR role_id IN (SELECT id FROM roles WHERE organization_id = ${orgId})`,
+      sql`DELETE FROM person_tags WHERE person_id IN (SELECT id FROM people WHERE organization_id = ${orgId})`,
+    );
+    await tx.execute(sql`DELETE FROM milestones WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM workflow_runs WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM tasks WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM workflows WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM donations WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM campaigns WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM objectives WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM funds WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM checkins WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM checkin_events WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM messages WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM message_templates WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM event_registrations WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM events WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM group_members WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM groups WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM prayer_requests WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM care_cases WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM bookings WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM rooms WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM missionaries WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM media_items WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM campuses WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM payment_configs WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM transactions WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM accounts WHERE organization_id = ${orgId}`);
+    // Memberships do tenant (FKs para people/communities/roles -> apagar antes).
+    // NOTA: as CONTAS (auth.user) são GLOBAIS e NÃO se apagam aqui — podem
+    // pertencer a outros tenants. O que se apaga é o vínculo (membership) + o
+    // registo de domínio (person) deste tenant.
+    await tx.execute(
+      sql`DELETE FROM memberships WHERE organization_id = ${orgId}`,
     );
     await tx.execute(
       sql`DELETE FROM organization_modules WHERE organization_id = ${orgId}`,
@@ -87,7 +141,9 @@ export async function deleteOrganizationAction(
     await tx.execute(
       sql`DELETE FROM communities WHERE organization_id = ${orgId}`,
     );
-    await tx.execute(sql`DELETE FROM users WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM people WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM households WHERE organization_id = ${orgId}`);
+    await tx.execute(sql`DELETE FROM tags WHERE organization_id = ${orgId}`);
     await tx.execute(sql`DELETE FROM organizations WHERE id = ${orgId}`);
   });
 

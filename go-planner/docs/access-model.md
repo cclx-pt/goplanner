@@ -2,8 +2,14 @@
 
 ## Resolução: `can(req)`
 
-Quando um utilizador tenta uma ação num módulo, o serviço `can()`
-(`src/core/access/can.ts`) decide por esta ordem — falha cedo, falha barato:
+O pedido (`AccessRequest`) identifica a **conta global** (`accountId`), o tenant
+(`organizationId`), o `moduleKey`, a `permission` e o `communityId` (null =
+âmbito de organização).
+
+Como as contas são **globais** (uma conta pode pertencer a vários tenants), o
+`can()` (`src/core/access/can.ts`) começa por carregar **apenas as memberships
+dessa conta NESTE tenant** (`account_id` + `organization_id`) — nunca mistura
+tenants. Depois decide por esta ordem — falha cedo, falha barato:
 
 1. **Admin da organização?** — membership org-wide com `isOrgAdmin`. Sim →
    acesso total (ignora o resto).

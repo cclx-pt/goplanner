@@ -23,7 +23,7 @@ import type { AccessRequest, ResolvedMembership } from "./types";
  *   4. Role concede a permissão?     -> sim concede, não nega
  */
 export async function can(req: AccessRequest): Promise<boolean> {
-  const userMemberships = await loadMemberships(req.userId);
+  const userMemberships = await loadMemberships(req.accountId, req.organizationId);
 
   // 1. Admin da organização (membership org-wide com role.isOrgAdmin).
   const isOrgAdmin = userMemberships.some(
@@ -51,8 +51,17 @@ export async function can(req: AccessRequest): Promise<boolean> {
   return false;
 }
 
-/** Carrega as memberships do utilizador, com o role embutido. */
-async function loadMemberships(userId: string): Promise<ResolvedMembership[]> {
+/**
+ * Carrega as memberships da conta NESTE tenant, com o role embutido.
+ *
+ * As contas são GLOBAIS (uma conta pode pertencer a vários tenants), por isso o
+ * filtro por `organizationId` é OBRIGATÓRIO — nunca avaliar acesso com memberships
+ * de outro tenant.
+ */
+async function loadMemberships(
+  accountId: string,
+  organizationId: string,
+): Promise<ResolvedMembership[]> {
   const rows = await db
     .select({
       communityId: memberships.communityId,
@@ -61,7 +70,12 @@ async function loadMemberships(userId: string): Promise<ResolvedMembership[]> {
     })
     .from(memberships)
     .innerJoin(roles, eq(memberships.roleId, roles.id))
-    .where(eq(memberships.userId, userId));
+    .where(
+      and(
+        eq(memberships.accountId, accountId),
+        eq(memberships.organizationId, organizationId),
+      ),
+    );
 
   return rows.map((r) => ({
     communityId: r.communityId,

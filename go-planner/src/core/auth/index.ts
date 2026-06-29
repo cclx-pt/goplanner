@@ -27,8 +27,8 @@ const trustedOrigins = process.env.VERCEL_URL
  *
  * Decisão de arquitetura: a AUTORIZAÇÃO (org → comunidade → role → resolução)
  * vive no NOSSO modelo de domínio e no serviço can(), não no Better Auth. As
- * tabelas de auth estão em ./schema.ts; a ligação ao domínio faz-se por
- * `users.auth_user_id`.
+ * tabelas de auth estão em ./schema.ts; a ligação ao domínio (conta GLOBAL →
+ * tenant) faz-se por `memberships.account_id`.
  */
 export const auth = betterAuth({
   ...(baseURL ? { baseURL } : {}),

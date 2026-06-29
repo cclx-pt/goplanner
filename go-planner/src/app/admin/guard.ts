@@ -2,19 +2,19 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { db } from "@/core/db";
 import { organizations } from "@/core/db/schema";
-import { getAccessState } from "@/core/access/context";
+import { getAccessState, ACTIVE_ORG_COOKIE } from "@/core/access/context";
 import { getPlatformAdmin } from "@/core/platform/access";
 
-/** Cookie com a organização ATIVA escolhida por um admin de plataforma. */
-export const ACTIVE_ORG_COOKIE = "goplanner.active_org";
+export { ACTIVE_ORG_COOKIE };
 
 /**
  * Contexto da área de administração.
  *
  * `organizationId`/`organizationName` são a organização EFETIVA a gerir:
- *  - Admin de organização normal -> a sua própria organização (fixa).
+ *  - Admin de organização normal -> a sua própria organização (ou, se a conta
+ *    for membro de vários tenants, a ativa escolhida no dropdown).
  *  - Admin de PLATAFORMA (master) -> a organização ATIVA escolhida no dropdown
- *    (cookie), podendo trocar entre todas (`switchableOrgs`).
+ *    (cookie), podendo trocar entre TODAS (`switchableOrgs`).
  */
 export interface AdminContext {
   organizationId: string;
@@ -28,7 +28,8 @@ export interface AdminContext {
  * server action volta a chamar isto — nunca confiar só no layout.
  *
  * Resolve a organização efetiva: o admin de plataforma é master sobre TODAS as
- * organizações e escolhe a ativa; o admin de organização fica preso à sua.
+ * organizações e escolhe a ativa; o admin de organização gere os tenants onde é
+ * membro (normalmente um só).
  */
 export async function requireOrgAdmin(): Promise<AdminContext> {
   const state = await getAccessState();
@@ -55,7 +56,8 @@ export async function requireOrgAdmin(): Promise<AdminContext> {
     };
   }
 
-  // Admin de ORGANIZAÇÃO: fixo à sua organização.
+  // Admin de ORGANIZAÇÃO: o tenant efetivo vem do contexto (cookie de org ativa
+  // entre os tenants da conta). Tem de ser admin NESSE tenant.
   if (state.status === "unbootstrapped") redirect("/bootstrap");
   if (!state.ctx.isOrgAdmin) redirect("/dashboard");
 
@@ -63,8 +65,7 @@ export async function requireOrgAdmin(): Promise<AdminContext> {
     organizationId: state.ctx.organizationId,
     organizationName: state.ctx.organizationName,
     actingAsPlatform: false,
-    switchableOrgs: [
-      { id: state.ctx.organizationId, name: state.ctx.organizationName },
-    ],
+    // Contas globais podem ser membros de vários tenants -> switcher.
+    switchableOrgs: state.ctx.organizations,
   };
 }

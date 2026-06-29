@@ -1,0 +1,67 @@
+{
+  "common": {
+    "appName": "Go Planner"
+  },
+  "locale": {
+    "label": "Idioma",
+    "pt": "Português",
+    "en": "English"
+  },
+  "signIn": {
+    "title": "Iniciar sessão",
+    "subtitle": "Bem-vindo de volta ao Go Planner.",
+    "email": "Email",
+    "emailPlaceholder": "tu@igreja.pt",
+    "password": "Palavra-passe",
+    "submit": "Entrar",
+    "submitting": "A entrar…",
+    "error": "Não foi possível iniciar sessão.",
+    "noAccount": "Ainda não tens conta?",
+    "createAccount": "Criar conta"
+  },
+  "signUp": {
+    "title": "Criar conta",
+    "name": "Nome",
+    "namePlaceholder": "O teu nome",
+    "email": "Email",
+    "emailPlaceholder": "tu@igreja.pt",
+    "password": "Palavra-passe",
+    "passwordPlaceholder": "Mínimo 8 caracteres",
+    "submit": "Criar conta",
+    "submitting": "A criar…",
+    "error": "Não foi possível criar a conta.",
+    "hasAccount": "Já tens conta?",
+    "signIn": "Iniciar sessão"
+  },
+  "dashboard": {
+    "homeTab": "Minha página",
+    "greeting": "Olá, {name}.",
+    "greetingNoName": "Olá.",
+    "orgAdminNote": "És administrador da organização — {org}.",
+    "modulesTitle": "Módulos",
+    "noModules": "Sem módulos visíveis para o teu nível de acesso.",
+    "restrictedTitle": "Acesso restrito",
+    "restrictedBody": "Esta área é reservada a administradores. A tua conta não tem acesso a esta área."
+  },
+  "nav": {
+    "admin": "Administração",
+    "platform": "Plataforma",
+    "overview": "Visão geral",
+    "organizations": "Organizações",
+    "admins": "Administradores",
+    "organization": "Organização",
+    "communities": "Comunidades",
+    "members": "Membros",
+    "roles": "Roles",
+    "modules": "Módulos",
+    "workflows": "Workflows"
+  },
+  "org": {
+    "region": "Região e localização",
+    "locale": "Idioma / locale",
+    "currency": "Moeda",
+    "country": "País",
+    "timezone": "Fuso horário",
+    "save": "Guardar região"
+  }
+}

@@ -11,6 +11,8 @@ const NAV = [
   { href: "/admin/members", label: "Membros" },
   { href: "/admin/roles", label: "Roles" },
   { href: "/admin/modules", label: "Módulos" },
+  { href: "/admin/workflows", label: "Workflows" },
+  { href: "/admin/pagamentos", label: "Pagamentos" },
 ];
 
 export default async function AdminLayout({
@@ -27,14 +29,16 @@ export default async function AdminLayout({
           <LogoMark size={32} />
           <span className="font-bold text-brand-navy">Administração</span>
           <span className="text-sm text-gray-400">·</span>
-          {ctx.actingAsPlatform ? (
+          {ctx.switchableOrgs.length > 1 ? (
             <form
               action={setActiveOrgAction}
               className="flex items-center gap-1.5"
             >
-              <span className="rounded-full bg-brand-purple/10 px-2 py-0.5 text-xs font-medium text-brand-purple">
-                master
-              </span>
+              {ctx.actingAsPlatform && (
+                <span className="rounded-full bg-brand-purple/10 px-2 py-0.5 text-xs font-medium text-brand-purple">
+                  master
+                </span>
+              )}
               <select
                 name="orgId"
                 defaultValue={ctx.organizationId}

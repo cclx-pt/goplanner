@@ -6,7 +6,8 @@ import { pgTable, text, boolean, timestamp } from "drizzle-orm/pg-core";
  * São geridas pelo Better Auth (formato padrão: text ids gerados pela lib).
  * NÃO lhes acrescentes lógica de domínio: a AUTORIZAÇÃO (organização →
  * comunidade → role) vive no schema de domínio (src/core/db/schema.ts) e no
- * serviço can(). A ligação entre as duas faz-se por `users.auth_user_id`.
+ * serviço can(). A conta aqui é GLOBAL; a ligação a cada tenant faz-se por
+ * `memberships.account_id`.
  */
 
 export const user = pgTable("user", {

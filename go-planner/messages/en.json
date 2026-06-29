@@ -1,0 +1,67 @@
+{
+  "common": {
+    "appName": "Go Planner"
+  },
+  "locale": {
+    "label": "Language",
+    "pt": "Português",
+    "en": "English"
+  },
+  "signIn": {
+    "title": "Sign in",
+    "subtitle": "Welcome back to Go Planner.",
+    "email": "Email",
+    "emailPlaceholder": "you@church.org",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "error": "Could not sign in.",
+    "noAccount": "Don't have an account yet?",
+    "createAccount": "Create account"
+  },
+  "signUp": {
+    "title": "Create account",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "you@church.org",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "submit": "Create account",
+    "submitting": "Creating…",
+    "error": "Could not create the account.",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in"
+  },
+  "dashboard": {
+    "homeTab": "My page",
+    "greeting": "Hi, {name}.",
+    "greetingNoName": "Hi.",
+    "orgAdminNote": "You are an organization administrator — {org}.",
+    "modulesTitle": "Modules",
+    "noModules": "No modules visible for your access level.",
+    "restrictedTitle": "Restricted area",
+    "restrictedBody": "This area is reserved for administrators. Your account does not have access to it."
+  },
+  "nav": {
+    "admin": "Administration",
+    "platform": "Platform",
+    "overview": "Overview",
+    "organizations": "Organizations",
+    "admins": "Administrators",
+    "organization": "Organization",
+    "communities": "Communities",
+    "members": "Members",
+    "roles": "Roles",
+    "modules": "Modules",
+    "workflows": "Workflows"
+  },
+  "org": {
+    "region": "Region and locale",
+    "locale": "Language / locale",
+    "currency": "Currency",
+    "country": "Country",
+    "timezone": "Time zone",
+    "save": "Save region"
+  }
+}

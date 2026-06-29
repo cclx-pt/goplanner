@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { asc, count } from "drizzle-orm";
 import { db } from "@/core/db";
-import { organizations, communities, users } from "@/core/db/schema";
+import { organizations, communities, people } from "@/core/db/schema";
 import { manageOrgAction } from "@/app/admin/actions";
 import { createOrganizationAction } from "./actions";
 import { requirePlatformAdmin } from "../guard";
@@ -9,7 +9,7 @@ import { requirePlatformAdmin } from "../guard";
 export default async function PlatformOrganizationsPage() {
   await requirePlatformAdmin();
 
-  const [orgs, commCounts, userCounts] = await Promise.all([
+  const [orgs, commCounts, peopleCounts] = await Promise.all([
     db
       .select({
         id: organizations.id,
@@ -23,13 +23,13 @@ export default async function PlatformOrganizationsPage() {
       .from(communities)
       .groupBy(communities.organizationId),
     db
-      .select({ organizationId: users.organizationId, value: count() })
-      .from(users)
-      .groupBy(users.organizationId),
+      .select({ organizationId: people.organizationId, value: count() })
+      .from(people)
+      .groupBy(people.organizationId),
   ]);
 
   const commMap = new Map(commCounts.map((r) => [r.organizationId, r.value]));
-  const userMap = new Map(userCounts.map((r) => [r.organizationId, r.value]));
+  const peopleMap = new Map(peopleCounts.map((r) => [r.organizationId, r.value]));
 
   return (
     <div>
@@ -59,7 +59,7 @@ export default async function PlatformOrganizationsPage() {
             <tr>
               <th className="px-4 py-2 font-medium">Organização</th>
               <th className="px-4 py-2 font-medium">Comunidades</th>
-              <th className="px-4 py-2 font-medium">Utilizadores</th>
+              <th className="px-4 py-2 font-medium">Pessoas</th>
               <th className="px-4 py-2 font-medium">Criada</th>
               <th className="px-4 py-2 font-medium">Ações</th>
             </tr>
@@ -81,7 +81,7 @@ export default async function PlatformOrganizationsPage() {
                     {commMap.get(o.id) ?? 0}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {userMap.get(o.id) ?? 0}
+                    {peopleMap.get(o.id) ?? 0}
                   </td>
                   <td className="px-4 py-3 text-gray-400">
                     {o.createdAt.toLocaleDateString("pt-PT")}

@@ -4,7 +4,7 @@ import { db } from "@/core/db";
 import {
   organizations,
   communities,
-  users,
+  people,
   platformAdmins,
 } from "@/core/db/schema";
 import { requirePlatformAdmin } from "./guard";
@@ -15,7 +15,7 @@ export default async function PlatformOverviewPage() {
   const [[orgs], [comms], [usrs], [admins]] = await Promise.all([
     db.select({ value: count() }).from(organizations),
     db.select({ value: count() }).from(communities),
-    db.select({ value: count() }).from(users),
+    db.select({ value: count() }).from(people),
     db.select({ value: count() }).from(platformAdmins),
   ]);
 
@@ -32,7 +32,7 @@ export default async function PlatformOverviewPage() {
       color: "text-brand-green",
     },
     { label: "Comunidades", value: comms?.value ?? 0, color: "text-brand-blue" },
-    { label: "Utilizadores", value: usrs?.value ?? 0, color: "text-brand-navy" },
+    { label: "Pessoas", value: usrs?.value ?? 0, color: "text-brand-navy" },
     {
       label: "Admins de plataforma",
       value: admins?.value ?? 0,

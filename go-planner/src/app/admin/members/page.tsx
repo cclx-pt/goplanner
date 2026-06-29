@@ -1,43 +1,57 @@
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/core/db";
-import { users, memberships, roles, communities } from "@/core/db/schema";
+import { people, memberships, roles, communities, consents } from "@/core/db/schema";
 import { requireOrgAdmin } from "../guard";
-import { createMemberAction } from "./actions";
+import { createMemberAction, eraseMemberAction } from "./actions";
 
 export default async function MembersPage() {
   const ctx = await requireOrgAdmin();
 
-  const userRows = await db
-    .select({ id: users.id, name: users.name, email: users.email })
-    .from(users)
-    .where(eq(users.organizationId, ctx.organizationId))
-    .orderBy(asc(users.email));
+  const peopleRows = await db
+    .select({ id: people.id, name: people.name, email: people.email })
+    .from(people)
+    .where(eq(people.organizationId, ctx.organizationId))
+    .orderBy(asc(people.email));
+
+  const consentRows = await db
+    .select({
+      personId: consents.personId,
+      purpose: consents.purpose,
+      granted: consents.granted,
+    })
+    .from(consents)
+    .where(eq(consents.organizationId, ctx.organizationId));
+  const consentByPerson = new Map<string, boolean>();
+  for (const c of consentRows) {
+    if (c.purpose === "data_processing") consentByPerson.set(c.personId, c.granted);
+  }
 
   const memRows = await db
     .select({
-      userId: memberships.userId,
+      personId: memberships.personId,
       roleName: roles.name,
       isOrgAdmin: roles.isOrgAdmin,
       communityName: communities.name,
     })
     .from(memberships)
-    .innerJoin(users, eq(memberships.userId, users.id))
     .innerJoin(roles, eq(memberships.roleId, roles.id))
     .leftJoin(communities, eq(memberships.communityId, communities.id))
-    .where(eq(users.organizationId, ctx.organizationId));
+    .where(eq(memberships.organizationId, ctx.organizationId));
 
-  const byUser = new Map<
+  const byPerson = new Map<
     string,
     { roleName: string; isOrgAdmin: boolean; communityName: string | null }[]
   >();
   for (const m of memRows) {
-    const arr = byUser.get(m.userId) ?? [];
+    // Operadores puros (membership sem person) não aparecem na lista de membros.
+    if (!m.personId) continue;
+    const arr = byPerson.get(m.personId) ?? [];
     arr.push({
       roleName: m.roleName,
       isOrgAdmin: m.isOrgAdmin,
       communityName: m.communityName,
     });
-    byUser.set(m.userId, arr);
+    byPerson.set(m.personId, arr);
   }
 
   const roleRows = await db
@@ -94,6 +108,23 @@ export default async function MembersPage() {
             </option>
           ))}
         </select>
+        <select
+          name="lifecycleStage"
+          defaultValue="visitor"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm text-brand-navy outline-none focus:border-brand-blue"
+        >
+          <option value="visitor">Visitante</option>
+          <option value="first_timer">1.ª vez</option>
+          <option value="regular">Frequente</option>
+          <option value="member">Membro</option>
+          <option value="leader">Líder</option>
+        </select>
+        <div className="sm:col-span-2">
+          <label className="flex items-center gap-2 text-xs text-gray-600">
+            <input type="checkbox" name="consent" defaultChecked />
+            Consentimento para tratamento de dados (RGPD)
+          </label>
+        </div>
         <div className="sm:col-span-2">
           <button
             type="submit"
@@ -105,15 +136,24 @@ export default async function MembersPage() {
       </form>
 
       <ul className="mt-5 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
-        {userRows.map((u) => {
-          const mems = byUser.get(u.id) ?? [];
+        {peopleRows.map((p) => {
+          const mems = byPerson.get(p.id) ?? [];
           return (
-            <li key={u.id} className="p-4">
+            <li key={p.id} className="p-4">
               <div className="text-sm font-medium text-brand-navy">
-                {u.name ?? u.email}
+                {p.name ?? p.email ?? "—"}
               </div>
-              <div className="text-xs text-gray-400">{u.email}</div>
+              <div className="text-xs text-gray-400">{p.email ?? "sem email"}</div>
               <ul className="mt-2 flex flex-wrap gap-2">
+                <li
+                  className={`rounded-full px-2.5 py-0.5 text-xs ${
+                    consentByPerson.get(p.id)
+                      ? "bg-green-100 text-green-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {consentByPerson.get(p.id) ? "RGPD ✓" : "sem consentimento"}
+                </li>
                 {mems.length === 0 ? (
                   <li className="text-xs text-gray-400">Sem memberships.</li>
                 ) : (
@@ -131,6 +171,26 @@ export default async function MembersPage() {
                   ))
                 )}
               </ul>
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs text-red-600">
+                  Apagar (direito ao esquecimento)
+                </summary>
+                <form action={eraseMemberAction} className="mt-2 flex gap-2">
+                  <input type="hidden" name="personId" value={p.id} />
+                  <input
+                    name="confirm"
+                    placeholder={`Escreve "${p.name ?? p.email ?? ""}" para confirmar`}
+                    autoComplete="off"
+                    className="flex-1 rounded-md border border-red-300 px-2 py-1 text-xs outline-none focus:border-red-500"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-red-700"
+                  >
+                    Apagar
+                  </button>
+                </form>
+              </details>
             </li>
           );
         })}

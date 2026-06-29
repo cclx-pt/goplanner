@@ -17,6 +17,7 @@
     "better-auth": "^1.6.0",
     "drizzle-orm": "^0.44.0",
     "next": "^16.0.0",
+    "next-intl": "^4.13.0",
     "postgres": "^3.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
